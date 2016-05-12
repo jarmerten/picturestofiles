@@ -232,5 +232,5 @@ _Pvt_Extensions
 # Paket dependency manager
 .paket/paket.exe
 
-# FAKE - F# Make
+# FAKE - manifest_folders# Make
 .fake/

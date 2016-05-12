@@ -1,7 +1,6 @@
 import zipfile
 from PIL import Image
 import os
-import glob
 import sys
 import shutil
 import json
@@ -9,75 +8,125 @@ import json
 
 def main():
     filelocation = sys.argv[1]
+    check_valid_path(filelocation)
+
+
+def check_valid_path(filelocation):
+    if os.path.exists(filelocation) == True:
+        start_relocation(filelocation)
+    else:
+        print('The file path is not valid, please retry with valid path....')
+
+
+def start_relocation(filelocation):
     with zipfile.ZipFile(filelocation) as myzip:
         filepath = os.path.splitext(filelocation)[0]
-        print(filepath)
-        myzip.extractall(filepath)
-        print('starting......')
-        run1(filepath)
+        set_file_path(filepath, myzip)
 
 
-def run1(filepath):
-    with open((filepath + '\\manifest.json')) as f:
+def set_file_path(filepath, myzip):
+    print(filepath)
+    myzip.extractall(filepath)
+    print('starting......')
+    open_manifest(filepath)
+
+
+def open_manifest(filepath):
+    with open((filepath + '\\manifest.json')) as manifest_folders:
         data = []
-        data = json.load(f)
-        run10(f, data, filepath)
-    run4(data,filepath)
+        data = json.load(manifest_folders)
+        open_manifest0(manifest_folders, data, filepath)
+    remove_manifest(data,filepath)
 
-def run2(filepath,lining,silverlining,liningthisup):
-    size = 100, 100
-    im = Image.open(filepath + '\\' + liningthisup)
-    im.thumbnail(size)
-    im.save(filepath + '\\' + lining + '\\' + silverlining + '\\' + liningthisup + ".thumbnail.jpg")
-    shutil.move(filepath + '\\' + liningthisup, filepath + '\\' + lining + '\\' + silverlining + '\\' + liningthisup)
 
-def run3(filepath,lining,silverlining,liningthisup, linemeupnow):
-    size = 100, 100
-    im = Image.open(filepath + '\\' + linemeupnow)
-    im.thumbnail(size)
-    im.save(filepath + '\\' + lining + '\\' + silverlining + '\\' + liningthisup + '\\' + linemeupnow + ".thumbnail.jpg")
-    shutil.move(filepath + '\\' + linemeupnow,filepath + '\\' + lining + '\\' + silverlining + '\\' + liningthisup + '\\' + linemeupnow)
+def open_manifest0(manifest_folders,data,filepath):
+    for line in manifest_folders:
+        data.append(json.loads(line))
+    create_new_folders(data, filepath)
 
-def run4(data,filepath):
+
+def create_new_folders(data,filepath):
+    for directory_structure in data['directory_structure']:
+        os.makedirs(filepath + '\\' + directory_structure)
+        create_new_interior_folders(data, directory_structure, filepath)
+
+
+def create_new_interior_folders(data,directory_structure,filepath):
+    for main_storage in data['directory_structure'][directory_structure]:
+        os.makedirs(filepath + '\\' + directory_structure + '\\' + main_storage)
+        access_manifest_lines(data, directory_structure, main_storage, filepath)
+
+
+def access_manifest_lines(data,directory_structure,main_storage,filepath):
+    for photo_types in data['directory_structure'][directory_structure][main_storage]:
+        check_for_interior_folders(data, filepath, photo_types, directory_structure, main_storage)
+
+
+def check_for_interior_folders(data,filepath,photo_types,directory_structure,main_storage):
+    if photo_types.endswith('jpg') or photo_types.endswith('jpeg'):
+        create_first_thumbnails(filepath, directory_structure, main_storage, photo_types)
+    else:
+        new_interior_folder(data,filepath,photo_types,directory_structure,main_storage)
+
+
+def create_first_thumbnails(filepath,directory_structure,main_storage,photo_types):
+    im = size_image(filepath, photo_types)
+    im.save(filepath + '\\' + directory_structure + '\\' + main_storage + '\\' + photo_types + ".thumbnail.jpg")
+    shutil.move(filepath + '\\' + photo_types, filepath + '\\' + directory_structure + '\\' + main_storage + '\\' + photo_types)
+
+
+def create_interior_thumbnails(filepath,directory_structure,main_storage,photo_types, original_photos):
+    im = size_image(filepath, original_photos)
+    im.save(filepath + '\\' + directory_structure + '\\' + main_storage + '\\' + photo_types + '\\' + original_photos + ".thumbnail.jpg")
+    shutil.move(filepath + '\\' + original_photos,filepath + '\\' + directory_structure + '\\' + main_storage + '\\' + photo_types + '\\' + original_photos)
+
+
+def move_back_folder_location(data):
     filename = data['zip_name']
     storefilename = os.path.splitext(filename)[0]
+    return storefilename
+
+
+def check_for_picture(filepath,original_photos,directory_structure,main_storage,photo_types):
+    if original_photos.endswith('jpg') or original_photos.endswith('jpeg'):
+        create_interior_thumbnails(filepath, directory_structure, main_storage, photo_types, original_photos)
+    else:
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+def new_interior_folder(data,filepath,photo_types,directory_structure,main_storage):
+    os.makedirs(filepath + '\\' + directory_structure + '\\' + main_storage + '\\' + photo_types)
+    for original_photos in data['directory_structure'][directory_structure][main_storage][photo_types]:
+        check_for_picture(filepath, original_photos, directory_structure, main_storage, photo_types)
+
+
+def size_image(filepath, photo_location):
+    size = 100, 100
+    im = Image.open(filepath + '\\' + photo_location)
+    im.thumbnail(size)
+    return im
+
+
+def remove_manifest(data,filepath):
+    storefilename = move_back_folder_location(data)
     os.remove(filepath + '\\manifest.json')
     shutil.make_archive(os.path.dirname(filepath) + '\\' + storefilename, "zip", filepath)
     shutil.rmtree(filepath)
     print('finished')
 
-def run5(filepath,linemeupnow,lining,silverlining,liningthisup):
-    if (linemeupnow.endswith('jpg') or linemeupnow.endswith('jpeg')):
-        run3(filepath, lining, silverlining, liningthisup, linemeupnow)
-    else:
-        pass
 
-def run6(data,filepath,liningthisup,lining,silverlining):
-    if (liningthisup.endswith('jpg') or liningthisup.endswith('jpeg')):
-        run2(filepath, lining, silverlining, liningthisup)
-    else:
-        os.makedirs(filepath + '\\' + lining + '\\' + silverlining + '\\' + liningthisup)
-        for linemeupnow in data['directory_structure'][lining][silverlining][liningthisup]:
-            run5(filepath, linemeupnow, lining, silverlining, liningthisup)
-
-def run7(data,lining,silverlining,filepath):
-    for liningthisup in data['directory_structure'][lining][silverlining]:
-        run6(data, filepath, liningthisup, lining, silverlining)
-
-def run8(data,lining,filepath):
-    for silverlining in data['directory_structure'][lining]:
-        os.makedirs(filepath + '\\' + lining + '\\' + silverlining)
-        run7(data, lining, silverlining, filepath)
-
-def run9(data,filepath):
-    for lining in data['directory_structure']:
-        os.makedirs(filepath + '\\' + lining)
-        run8(data, lining, filepath)
-
-def run10(f,data,filepath):
-    for line in f:
-        data.append(json.loads(line))
-    run9(data, filepath)
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
 
 
