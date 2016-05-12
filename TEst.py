@@ -9,7 +9,6 @@ import json
 def main():
     filelocation = sys.argv[1]
     check_valid_path(filelocation)
-    start_relocation(filelocation)
 
 
 def check_valid_path(filelocation):
