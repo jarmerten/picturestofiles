@@ -9,11 +9,12 @@ import json
 def main():
     filelocation = sys.argv[1]
     check_valid_path(filelocation)
+    start_relocation(filelocation)
 
 
 def check_valid_path(filelocation):
     if os.path.exists(filelocation) == True:
-        start_relocation(filelocation)
+        return
     else:
         print('The file path is not valid, please retry with valid path....')
 
@@ -113,6 +114,10 @@ def remove_manifest(data,filepath):
     shutil.make_archive(os.path.dirname(filepath) + '\\' + storefilename, "zip", filepath)
     shutil.rmtree(filepath)
     print('finished')
+
+
+def replace_original():
+        shutil.make_archive(os.path.dirname("C:\\Users\\Jared Merten\\Documents\\package1"), "zip","C:\\Users\\Jared Merten\\Documents\\package1")
 
 
 if __name__ == "__main__":
