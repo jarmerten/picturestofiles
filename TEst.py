@@ -94,17 +94,6 @@ def check_for_picture(filepath,original_photos,directory_structure,main_storage,
         pass
 
 
-
-
-
-
-
-
-
-
-
-
-
 def new_interior_folder(data,filepath,photo_types,directory_structure,main_storage):
     os.makedirs(filepath + '\\' + directory_structure + '\\' + main_storage + '\\' + photo_types)
     for original_photos in data['directory_structure'][directory_structure][main_storage][photo_types]:
