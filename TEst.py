@@ -12,8 +12,10 @@ def main():
     filepath = file_path(filelocation)
     start_relocation(filepath, filelocation)
     data = open_manifest(filepath)
-    create_new_folders(data, filepath)
+    directory_structure = create_new_folders(data, filepath)
+    create_new_interior_folders(data, directory_structure, filepath)
     remove_manifest(data,filepath)
+
 
 def check_valid_path(filelocation):
     if os.path.exists(filelocation) == True:
@@ -36,7 +38,7 @@ def set_file_path(filepath, myzip):
     print(filepath)
     myzip.extractall(filepath)
     print('starting......')
-    return
+
 
 def open_manifest(filepath):
     with open((filepath + '\\manifest.json')) as manifest_folders:
@@ -49,8 +51,7 @@ def open_manifest(filepath):
 def create_new_folders(data,filepath):
     for directory_structure in data['directory_structure']:
         os.makedirs(filepath + '\\' + directory_structure)
-        create_new_interior_folders(data, directory_structure, filepath)
-
+        return directory_structure
 
 def create_new_interior_folders(data,directory_structure,filepath):
     for main_storage in data['directory_structure'][directory_structure]:
