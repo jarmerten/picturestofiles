@@ -9,13 +9,11 @@ import json
 def main():
     filelocation = sys.argv[1]
     check_valid_path(filelocation)
-    filepath = set_file_path(filelocation)
-    myzip = start_relocation(filelocation, filepath)
-    extract_zip(filepath, myzip)
-    data = []
-    manifest_folders = open_manifest(data,filepath)
-    open_manifest0(manifest_folders, data, filepath)
-
+    filepath = file_path(filelocation)
+    start_relocation(filepath, filelocation)
+    data = open_manifest(filepath)
+    create_new_folders(data, filepath)
+    remove_manifest(data,filepath)
 
 def check_valid_path(filelocation):
     if os.path.exists(filelocation) == True:
@@ -24,34 +22,28 @@ def check_valid_path(filelocation):
         print('The file path is not valid, please retry with valid path....')
 
 
-def set_file_path(filelocation):
+def file_path(filelocation):
     filepath = os.path.splitext(filelocation)[0]
     return filepath
 
 
-def start_relocation(filelocation,filepath):
+def start_relocation(filepath, filelocation):
     with zipfile.ZipFile(filelocation) as myzip:
-        return myzip
+        set_file_path(filepath, myzip)
 
 
-def extract_zip(filepath, myzip):
+def set_file_path(filepath, myzip):
     print(filepath)
     myzip.extractall(filepath)
     print('starting......')
     return
 
-
-def open_manifest(data, filepath):
+def open_manifest(filepath):
     with open((filepath + '\\manifest.json')) as manifest_folders:
         data = json.load(manifest_folders)
-        return manifest_folders
-    remove_manifest(data,filepath)
-
-
-def open_manifest0(manifest_folders,data,filepath):
-    for line in manifest_folders:
-        data.append(json.loads(line))
-    create_new_folders(data, filepath)
+        for line in manifest_folders:
+            data.append(json.loads(line))
+        return data
 
 
 def create_new_folders(data,filepath):
@@ -124,11 +116,5 @@ def remove_manifest(data,filepath):
     print('finished')
 
 
-def replace_original():
-        shutil.make_archive(os.path.dirname("C:\\Users\\Jared Merten\\Documents\\package1"), "zip","C:\\Users\\Jared Merten\\Documents\\package1")
-
-
 if __name__ == "__main__":
     main()
-
-
