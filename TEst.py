@@ -9,6 +9,12 @@ import json
 def main():
     filelocation = sys.argv[1]
     check_valid_path(filelocation)
+    filepath = set_file_path(filelocation)
+    myzip = start_relocation(filelocation, filepath)
+    extract_zip(filepath, myzip)
+    data = []
+    manifest_folders = open_manifest(data,filepath)
+    open_manifest0(manifest_folders, data, filepath)
 
 
 def check_valid_path(filelocation):
@@ -18,24 +24,27 @@ def check_valid_path(filelocation):
         print('The file path is not valid, please retry with valid path....')
 
 
-def start_relocation(filelocation):
+def set_file_path(filelocation):
+    filepath = os.path.splitext(filelocation)[0]
+    return filepath
+
+
+def start_relocation(filelocation,filepath):
     with zipfile.ZipFile(filelocation) as myzip:
-        filepath = os.path.splitext(filelocation)[0]
-        set_file_path(filepath, myzip)
+        return myzip
 
 
-def set_file_path(filepath, myzip):
+def extract_zip(filepath, myzip):
     print(filepath)
     myzip.extractall(filepath)
     print('starting......')
-    open_manifest(filepath)
+    return
 
 
-def open_manifest(filepath):
+def open_manifest(data, filepath):
     with open((filepath + '\\manifest.json')) as manifest_folders:
-        data = []
         data = json.load(manifest_folders)
-        open_manifest0(manifest_folders, data, filepath)
+        return manifest_folders
     remove_manifest(data,filepath)
 
 
